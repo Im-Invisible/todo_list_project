@@ -6,7 +6,7 @@
 {% endif %}
 
 <hr>
-<h1>My to do list</h1>
+<h1>My to do list {{ color }}</h1>
 <a href="{% url 'task-create' %}">Add task</a>
 
 <table>
@@ -15,7 +15,7 @@
         <th></th>
     </tr>
     
-    {% for task in object_list %}
+    {% for task in tasks %}
     <tr>
         <td>{{ task.title }}</td>
         <td><a href="{% url 'task' task.id %}">View</a></td>
