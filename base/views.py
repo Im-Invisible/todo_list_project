@@ -1,4 +1,4 @@
-from re import T
+from re import T, search
 from statistics import mode
 from django.shortcuts import redirect, render
 from django.views.generic.list import ListView
@@ -50,6 +50,12 @@ class taskList(LoginRequiredMixin, ListView):
         context['tasks'] = context['tasks'].filter(user=self.request.user)
         context['count'] = context['tasks'].filter(complete=False).count()
 
+        search_input = self.request.GET.get('search-area') or ''
+        if search_input:
+            context['tasks'] = context['tasks'].filter(title__contains=search_input)
+        
+        context['search_input'] = search_input
+
         return context
 
 
@@ -64,7 +70,7 @@ class taskCreate(LoginRequiredMixin, CreateView):
     fields = ['title', 'description', 'complete']
     success_url = reverse_lazy('tasks')
 
-    def form_invalid(self, form):
+    def form_valid(self, form):
         form.instance.user = self.request.user
         return super(taskCreate, self).form_valid(form)
 
@@ -79,4 +85,7 @@ class taskDelete(LoginRequiredMixin, DeleteView):
     model = Task
     context_object_name = 'task'
     success_url = reverse_lazy('tasks')
+    def get_queryset(self):
+        owner = self.request.user
+        return self.model.objects.filter(user=owner)
 
